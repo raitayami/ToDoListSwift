@@ -19,8 +19,11 @@ class ToDoListViewModel: ObservableObject{
         return self.tasks
     }
     
-    
-
+    func deleteItem(task: Task) {
+        if let index = tasks.firstIndex(where: { $0.id == task.id }) {
+            tasks.remove(at: index)
+        }
+    }
     
     
 }

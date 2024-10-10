@@ -27,11 +27,41 @@ struct ToDoListView: View {
                         .bold()
                         .foregroundStyle(.white)
                 } else {
-                    ForEach(toDoListViewModel.getTasks()) {task in
-                        Text("\(task.name)")
+                    VStack(alignment: .leading){
                         
+                        Text("Tasks")
+                            .font(.largeTitle)
+                            .bold()
+                            .foregroundStyle(.white)
+                            .padding(.leading, 20)
+                        
+                        List(toDoListViewModel.getTasks()) {task in
+                            HStack{
+                                VStack(alignment: .leading){
+                                    Text("\(task.name)")
+                                        .font(.title)
+                                        .bold()
+                                    Text("\(task.description)")
+                                }
+                                .padding()
+                                Spacer()
+                                Button(action: {
+                                    toDoListViewModel.deleteItem(task: task)
+                                    
+                                }, label: {
+                                    Image(systemName: "square")
+                                })
+                                .padding()
+                            }
+                            
+                        }
+                        .buttonStyle(BorderlessButtonStyle())
+                        .listStyle(.inset)
                     }
+                    
+                    
                 }
+                
                 
                 Spacer()
                 HStack{
@@ -39,8 +69,9 @@ struct ToDoListView: View {
                     Button(action: {
                         isPresented = true
                     }, label: {
-                        Image(systemName: "plus")
+                        Image(systemName: "pencil")
                             .foregroundStyle(.blue)
+                            .font(.system(size: 30))
                             .padding()
                             .background(Color.white)
                             .clipShape(RoundedRectangle(cornerRadius: 50))
@@ -50,7 +81,7 @@ struct ToDoListView: View {
             }
         }
         .fullScreenCover(isPresented: $isPresented, content: {
-            AddItem()
+            AddItem(toDoListViewModel: toDoListViewModel)
         })
         
     }
@@ -61,7 +92,8 @@ struct AddItem: View {
     @Environment(\.dismiss) var dismiss
     @State var title: String = ""
     @State var description: String = ""
-    @ObservedObject var toDoListViewModel: ToDoListViewModel = ToDoListViewModel()
+    @ObservedObject var toDoListViewModel: ToDoListViewModel
+    @State var text: String = "Enter your text here"
     
     var body: some View {
         VStack{
@@ -84,11 +116,30 @@ struct AddItem: View {
                     .background(Color.gray.opacity(0.3))
                     .clipShape(RoundedRectangle(cornerRadius: 20))
                 
-                TextField("Describe your task", text: $description)
-                    .frame(height: 300, alignment: .topTrailing)
-                    .padding()
-                    .background(Color.gray.opacity(0.3))
-                    .clipShape(RoundedRectangle(cornerRadius: 20))
+                ZStack(alignment: .topLeading){
+                    
+                    if (text.count>0) {
+                        Text(text)
+                            .foregroundColor(Color.gray.opacity(0.5))
+                            .padding()
+                    }
+                    TextEditor(text: $description)
+                        .padding()
+                        .background(Color.gray.opacity(0.3))
+                        .clipShape(RoundedRectangle(cornerRadius: 20))
+                        .frame(height: 300, alignment: .topLeading)
+                        .foregroundColor(.black)
+                        .multilineTextAlignment(.leading)
+                        .scrollContentBackground(.hidden)
+                    //  .colorMultiply(.gray)
+                        .onTapGesture {
+                            if (description.isEmpty){
+                                self.text = ""
+                            }
+                        }
+                }
+                
+                
                 
                 
                 Button(action: {
@@ -96,7 +147,7 @@ struct AddItem: View {
                     
                     toDoListViewModel.tasks.append(task)
                     dismiss()
-
+                    
                 }, label: {
                     Text("Add")
                         .frame(maxWidth: .infinity)
@@ -105,13 +156,13 @@ struct AddItem: View {
                         .foregroundStyle(.white)
                         .clipShape(RoundedRectangle(cornerRadius: 20))
                 })
-
+                
             }
             .padding()
             
             Spacer()
         }
-
+        
     }
 }
 
